@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<title>Match the Following words - தமிழ்த்தேனீ</title>
+<style>
+body {
+  font-family: Arial,sans-serif;
+  background:#f4f4f9;
+  padding:20px;
+}
+h2 { text-align:center; margin-bottom:20px; }
+h4 { text-align:center; margin-bottom:10px;  }
+.match-container {
+  display:flex;
+  justify-content:center;
+  gap:50px;
+  flex-wrap:wrap;
+}
+.column {
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.2);
+  min-width:200px;
+ 
+ }
+.column h3 {
+  text-align:center;
+  margin-bottom:15px;
+}
+.item {
+  margin: 20px;
+  padding: 15px;
+  background:#e3f2fd;
+  border-radius:5px;
+  cursor:grab;
+  text-align: center;
+  font-weight: bold;
+}
+.drop-zone {
+  margin:20px 0;
+  padding:15px;
+  background:#fce4ec;
+  border-radius:5px;
+  min-height:20px;
+  text-align:center;
+  font-weight:bold;
+}
+button {
+  display:block;
+  margin:20px auto;
+  padding:10px 25px;
+  font-size:16px;
+  cursor:pointer;
+  border-radius:5px;
+  border:none;
+  background-color:#4caf50;
+  color:#fff;
+}
+.btn-group {
+  display: flex;
+  justify-content: center; /* நடுவில் align ஆகும் */
+  gap: 15px; /* பட்டன்களுக்கு இடைவேளை */
+  margin-top: 20px;
+}
+
+.btn-group button {
+  margin-inline: 0; /* பட்டன்களுக்கு இடைவேளை */
+  padding: 10px 25px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: none;
+  color: #fff;
+}
+
+#check-btn { background-color: #4caf50; } /* பச்சை */
+#retry-btn { background-color: #f57c00; } /* ஆரஞ்சு */
+#back-btn  { background-color: #2196f3; } /* நீலம் */
+
+.correct { background-color:#c8e6c9; }
+.wrong { background-color:#ffcdd2; }
+</style>
+</head>
+
+
+<body>
+
+<h2>Match the Following words</h2>
+<h4>நாடுகளின் பெயர்களின் மேல் கிளிக் செய்து, அழுத்திப்பிடித்து நகர்த்தி தலைநகரம் மேல் வைக்கவும்.</h4>  
+
+<div class="match-container">
+  <div class="column" id="columnA">
+    <h3>நாடுகள்</h3>
+  </div>
+
+  <div class="column" id="columnB">
+    <h3>தலைநகரம்</h3>
+  </div>
+</div>
+
+<div class="btn-group">
+  <button id="check-btn">Check Answers</button>
+  <button id="retry-btn">Retry</button>
+  <button id="back-btn">⬅️ Back</button>
+</div>
+
+
+<script>
+// Quiz data
+const quizData = [
+  { word: "இந்தியா", match: "புதுடெல்லி" },
+  { word: "பிரான்ஸ்", match: "பாரிஸ்" },
+  { word: "ஜப்பான்", match: "டோக்கியோ" },
+  { word: "கனடா", match: "ஒட்டாவா" },
+  { word: "ஆஸ்திரேலியா", match: "கேன்பெர்ரா" },
+  { word: "சீனா", match: "பெகிங்" },
+  { word: "ரஷ்யா", match: "மாஸ்கோ" },
+  { word: "இங்கிலாந்து", match: "லண்டன்" },
+  { word: "இத்தாலி", match: "ரோம்" },
+  { word: "பிரேசில்", match: "பிராசிலியா" }
+];
+
+const columnA = document.getElementById('columnA');
+const columnB = document.getElementById('columnB');
+const checkBtn = document.getElementById('check-btn');
+const retryBtn = document.getElementById('retry-btn');
+
+// Shuffle function
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+// Initialize quiz
+function initQuiz() {
+  columnA.innerHTML = "<h3>நாடுகள்</h3>";
+  columnB.innerHTML = "<h3>தலைநரகம்</h3>";
+
+  const words = shuffle([...quizData]);
+  const matches = shuffle([...quizData]);
+
+  words.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.draggable = true;
+    div.id = item.word;
+    div.textContent = item.word;
+    columnA.appendChild(div);
+  });
+
+  matches.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'drop-zone';
+    div.dataset.answer = item.word;
+    div.textContent = item.match;
+    columnB.appendChild(div);
+  });
+
+  addDragDrop();
+}
+
+// Drag & Drop logic
+let draggedItemId = null;
+
+function addDragDrop() {
+  const items = document.querySelectorAll('.item');
+  const dropZones = document.querySelectorAll('.drop-zone');
+
+  items.forEach(item => {
+    item.addEventListener('dragstart', e => {
+      draggedItemId = item.id;
+    });
+  });
+
+  dropZones.forEach(zone => {
+    zone.addEventListener('dragover', e => e.preventDefault());
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.dataset.userAnswer = draggedItemId;
+      zone.textContent = zone.textContent.split(" ← ")[0] + " ← " + draggedItemId;
+    });
+  });
+}
+
+// Check answers
+checkBtn.addEventListener('click', () => {
+  const dropZones = document.querySelectorAll('.drop-zone');
+  let score = 0;
+  dropZones.forEach(zone => {
+    if(zone.dataset.userAnswer === zone.dataset.answer){
+      zone.classList.add('correct');
+      zone.classList.remove('wrong');
+      score++;
+    } else {
+      zone.classList.add('wrong');
+      zone.classList.remove('correct');
+    }
+  });
+  alert(`நீங்கள் ${score} / ${quizData.length} சரியான பதில்கள் தேர்ந்தெடுத்துள்ளீர்கள்!`);
+});
+
+// Retry
+retryBtn.addEventListener('click', () => {
+  initQuiz();
+});
+
+document.getElementById("back-btn").addEventListener("click", () => {
+  window.location.href = "chooseanswer.html"; // உங்கள் பாடங்கள் பக்கத்தின் பெயர் / பாதை
+});
+
+
+initQuiz();
+</script>
+
+</body>
+</html>
